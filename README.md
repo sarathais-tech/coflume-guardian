@@ -45,15 +45,14 @@ Detalhes em [`docs/arquitetura.md`](docs/arquitetura.md).
 |---|---|
 | Contrato de integração v1.0.0 | Definido |
 | Especificação das features (incluindo primeira questão) | Definida e testada |
-| Runtime C++ da MLP float32 | Implementado, equivalência com Python testada no PC |
-| Teste de viabilidade no ESP32-S3 (pesos aleatórios) | **Pronto para rodar na placa**, resultados pendentes |
+| Runtime C++ da MLP float32 | Implementado; features idênticas e erro de P(acerto) ≤ 1,2e-7 em relação ao Python |
+| Bancada de viabilidade no ESP32-S3 | MLP candidata treinada exportada só para a bancada (`embarcado/bancada_wokwi/`); aprovada no PC; **Wokwi: `APROVADO_FUNCIONAL`** em 01/11/2026 ([relatório](resultados/embarcado/mlp8-sint-20261101-e6a4cf00_wokwi.md)); latência na placa física pendente |
 | Contrato de fluxo da partida `fluxo-0.8` (revisão 2) | Arquitetura aprovada; política de referência, com fallback de célula vazia, em `guardia/politica.py` |
 | Banco de perguntas da v0.8 | `banco_v08.csv`: 13 perguntas, 12 de 12 células, todas aptas na ST7735 com 16 px de folga; aguardando aprovação. Faltam 23 para a meta de 36 |
 | Interface na ST7735 | Proposta: paisagem, letra tamanho 2; a confirmar na tela física |
-| Treino da Guardiã | **Ainda não realizado** |
 | Simulador de dados sintéticos (`sim-1.1`, fluxo-0.8) | Implementado e testado; `sim-1.0` mantido como histórico |
 | Divisão por participante (`split_v2`; `split_v1` histórico) | Implementada; sem vazamento (testado) |
-| Treino e avaliação (MLP × árvore) | Próxima etapa |
+| Treino e avaliação em validação | Concluídos [SINTÉTICO]: MLP [8] com 121 parâmetros; empate estatístico com árvore e logística. Ver `resultados/sinteticos/treino_v2/`. Teste lacrado |
 
 ## Início rápido
 
@@ -118,6 +117,8 @@ coflume-guardian-ai/
 - [Plano do banco de questões](docs/banco_questoes.md)
 - [Interface da v0.8 na ST7735](docs/interface_st7735.md)
 - [Viabilidade embarcada](docs/viabilidade_embarcada.md)
+- [Bancada no Wokwi](docs/bancada_wokwi.md)
+- [Adendo 02: procedimento do teste final](docs/protocolo_adendo_02.md)
 - [Reprodução do treinamento](docs/reproducao.md)
 - [Fluxo de trabalho Git](docs/fluxo_git.md)
 - [Registros de decisão (ADRs)](docs/adr/)
