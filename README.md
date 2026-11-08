@@ -23,7 +23,7 @@ Apresentação prevista: **InovaTech, 11/11/2026**.
 ## Como os dois repositórios se relacionam
 
 ```
-coflume-guardian-ai  (este)                         coflume  (firmware)
+coflume-guardian  (este)                         coflume  (firmware)
 ─────────────────────────────                       ──────────────────────────
 treino → avaliação → aprovação ──► release vX.Y.Z ──► copia 2 arquivos .h
                                    (guardia_runtime.h      e chama guardia::prever()
@@ -48,7 +48,9 @@ Detalhes em [`docs/arquitetura.md`](docs/arquitetura.md).
 | Runtime C++ da MLP float32 | Implementado; features idênticas e erro de P(acerto) ≤ 1,2e-7 em relação ao Python |
 | Bancada de viabilidade no ESP32-S3 | MLP candidata treinada exportada só para a bancada (`embarcado/bancada_wokwi/`); aprovada no PC; **Wokwi: `APROVADO_FUNCIONAL`** em 01/11/2026 ([relatório](resultados/embarcado/mlp8-sint-20261101-e6a4cf00_wokwi.md)); latência na placa física pendente |
 | Contrato de fluxo da partida `fluxo-0.8` (revisão 2) | Arquitetura aprovada; política de referência, com fallback de célula vazia, em `guardia/politica.py` |
-| Banco de perguntas da v0.8 | `banco_v08.csv`: 13 perguntas, 12 de 12 células, todas aptas na ST7735 com 16 px de folga; aguardando aprovação. Faltam 23 para a meta de 36 |
+| Banco de perguntas da v0.8 | `banco_v08.csv`: 13 perguntas, 12 de 12 células, todas aptas na ST7735 com 16 px de folga (preservado) |
+| Banco de perguntas da v0.9 | `banco_v09.csv`: **36 perguntas**, 3 por célula, todas aptas na ST7735 e viáveis nas duas políticas; em revisão ([`banco_v09_proposta.md`](docs/banco_v09_proposta.md)). Usado no firmware experimental v0.9-r4 do `coflume`, ainda não testado na placa |
+| Política gradual (`gradual-v2-exp`) | **Experimental**, desligada por padrão no firmware: no máximo 1 nível de mudança e nenhuma subida depois de erro. Proteção, não melhora a rede ([`politica_gradual_exp.md`](docs/politica_gradual_exp.md)) |
 | Interface na ST7735 | Proposta: paisagem, letra tamanho 2; a confirmar na tela física |
 | Simulador de dados sintéticos (`sim-1.1`, fluxo-0.8) | Implementado e testado; `sim-1.0` mantido como histórico |
 | Divisão por participante (`split_v2`; `split_v1` histórico) | Implementada; sem vazamento (testado) |
@@ -77,7 +79,7 @@ Depois abra `embarcado/bancada_ia/bancada_ia.ino` no Arduino IDE. O procedimento
 ## Estrutura
 
 ```
-coflume-guardian-ai/
+coflume-guardian/
 ├── guardia/                  # pacote Python
 │   ├── contrato.py           # versões e constantes do contrato
 │   ├── features.py           # cálculo das entradas (fonte da verdade)
@@ -98,7 +100,7 @@ coflume-guardian-ai/
 │   ├── sinteticos/           # gerados por script (não versionados)
 │   └── reais/                # NUNCA versionados
 ├── splits/                   # divisão treino/validação/teste (versionada)
-├── questoes/                 # modelo do banco de perguntas da v0.8
+├── questoes/                 # bancos de perguntas (v0.7, v0.8 e v0.9) e modelo do CSV
 ├── resultados/
 │   ├── sinteticos/           # métricas obtidas com dados simulados
 │   └── reais/                # métricas com dados reais (se houver piloto)
@@ -107,6 +109,7 @@ coflume-guardian-ai/
 
 ## Documentação
 
+- **[Guia da Guardiã IA para quem está chegando](docs/guia_da_ia.md):** dados sintéticos, treino, avaliação, exportação e a diferença entre rede neural, política e validador
 - [Arquitetura](docs/arquitetura.md)
 - [Contrato de integração com o firmware](docs/contrato_integracao.md)
 - [Especificação das features e da primeira questão](docs/features.md)
