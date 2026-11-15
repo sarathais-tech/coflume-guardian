@@ -3,7 +3,9 @@
 > **Coflume — O Conhecimento Abre Portas**
 > Repositório da inteligência artificial **Guardiã IA**, que estima a probabilidade de acerto do participante e participa da seleção adaptativa de desafios do cofre Coflume.
 
-Apresentação prevista: **InovaTech, 11/11/2026**.
+Desenvolvida por **Sara Thais** para o [Coflume](https://github.com/sarathais-tech/coflume) e apresentada na **InovaTech 2026**.
+
+**[Passo a passo para reproduzir o treinamento](docs/reproducao.md)** · [Ver a Guardiã em ação no Coflume](https://github.com/sarathais-tech/coflume#experimente-a-guardiã-ia)
 
 ---
 
@@ -22,15 +24,7 @@ Apresentação prevista: **InovaTech, 11/11/2026**.
 
 ## Como os dois repositórios se relacionam
 
-```
-coflume-guardian-ai  (este)                         coflume  (firmware)
-─────────────────────────────                       ──────────────────────────
-treino → avaliação → aprovação ──► release vX.Y.Z ──► copia 2 arquivos .h
-                                   (guardia_runtime.h      e chama guardia::prever()
-                                    guardia_modelo.h)
-```
-
-O firmware **só recebe um modelo depois que ele passa em todos os testes** deste repositório. O formato, as entradas, as saídas e as versões estão definidos em [`docs/contrato_integracao.md`](docs/contrato_integracao.md).
+Este repositório reúne o simulador, o treinamento e a exportação para C++. O [firmware do Coflume](https://github.com/sarathais-tech/coflume/tree/main/firmware/v0.9-r4) executa o modelo `mlp8-sint-20261101-e6a4cf00` no ESP32-S3. O [contrato de integração](docs/contrato_integracao.md) define as entradas, saídas e versões.
 
 ## O que é Machine Learning e o que não é
 
@@ -46,7 +40,7 @@ Detalhes em [`docs/arquitetura.md`](docs/arquitetura.md).
 | Contrato de integração v1.0.0 | Definido |
 | Especificação das features (incluindo primeira questão) | Definida e testada |
 | Runtime C++ da MLP float32 | Implementado; features idênticas e erro de P(acerto) ≤ 1,2e-7 em relação ao Python |
-| Bancada de viabilidade no ESP32-S3 | MLP candidata treinada exportada só para a bancada (`embarcado/bancada_wokwi/`); aprovada no PC; **Wokwi: `APROVADO_FUNCIONAL`** em 01/11/2026 ([relatório](resultados/embarcado/mlp8-sint-20261101-e6a4cf00_wokwi.md)); latência na placa física pendente |
+| Bancada de viabilidade no ESP32-S3 | Bancada com a MLP candidata treinada (`embarcado/bancada_wokwi/`); aprovada no PC; **Wokwi: `APROVADO_FUNCIONAL`** em 01/11/2026 ([relatório](resultados/embarcado/mlp8-sint-20261101-e6a4cf00_wokwi.md)); latência na placa física pendente |
 | Contrato de fluxo da partida `fluxo-0.8` (revisão 2) | Arquitetura aprovada; política de referência, com fallback de célula vazia, em `guardia/politica.py` |
 | Banco de perguntas da v0.8 | `banco_v08.csv`: 13 perguntas, 12 de 12 células, todas aptas na ST7735 com 16 px de folga; aguardando aprovação. Faltam 23 para a meta de 36 |
 | Interface na ST7735 | Proposta: paisagem, letra tamanho 2; a confirmar na tela física |
@@ -77,7 +71,7 @@ Depois abra `embarcado/bancada_ia/bancada_ia.ino` no Arduino IDE. O procedimento
 ## Estrutura
 
 ```
-coflume-guardian-ai/
+coflume-guardian/
 ├── guardia/                  # pacote Python
 │   ├── contrato.py           # versões e constantes do contrato
 │   ├── features.py           # cálculo das entradas (fonte da verdade)
