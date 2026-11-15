@@ -1,36 +1,59 @@
-# Reprodução do treinamento
+# Reprodução do treinamento da Guardiã IA
 
-Este guia permite que qualquer pessoa da equipe reproduza os resultados a partir de um clone limpo. Ele é atualizado a cada etapa; a coluna **Situação** indica o que já existe.
+O fluxo usa dados sintéticos e avalia os modelos no conjunto de validação. Python 3.11 foi usado no treinamento de referência. Execute os comandos na raiz do repositório.
 
-## 1. Ambiente
+## 1. Preparar o ambiente
 
 ```bash
-git clone git@github.com:<organizacao>/coflume-guardian-ai.git
-cd coflume-guardian-ai
+git clone https://github.com/sarathais-tech/coflume-guardian.git
+cd coflume-guardian
 python -m venv .venv
-# Windows: .venv\Scripts\activate | Linux/macOS: source .venv/bin/activate
-pip install -r requirements-treino.txt
-pip freeze > requirements.lock     # só na primeira vez; versione este arquivo
-pytest
 ```
 
-Para os testes de equivalência C++ é preciso ter `g++` ou `clang++` no PATH. No Windows, instale o MSYS2 (pacote `mingw-w64-ucrt-x86_64-gcc`) ou use o WSL.
+Ative o ambiente conforme seu terminal:
 
-## 2. Pipeline
+| Terminal | Comando |
+|---|---|
+| Windows PowerShell | `.\.venv\Scripts\Activate.ps1` |
+| Windows Prompt de Comando | `.venv\Scripts\activate.bat` |
+| Linux ou macOS | `source .venv/bin/activate` |
 
-| Passo | Comando | Saída | Situação |
-|---|---|---|---|
-| 1. Testes do núcleo | `pytest` | relatório no terminal | **Disponível** |
-| 2. Bancada com pesos aleatórios | `python -m ferramentas.gerar_bancada --semente 2026` | `embarcado/bancada_ia/*.h` | **Disponível** |
-| 3. Gerar dados sintéticos (`sim-1.1`) | `python -m ferramentas.gerar_sinteticos --semente 2026` | `dados/sinteticos/sessoes_v2.csv` + manifesto e resumo | **Disponível** ([simulador.md](simulador.md)) |
-| 4. Dividir por participante | `python -m ferramentas.dividir` | `splits/split_v2.json` (versionado; ver [adendo 01](protocolo_adendo_01.md)) | **Disponível** |
-| 5. Treinar modelos | `python -m ferramentas.treinar --fonte sint` | `modelos/<id>/` | Próxima etapa |
-| 6. Avaliar (teste lacrado) | `python -m ferramentas.avaliar --fonte sint` | `resultados/sinteticos/<id>/` | Próxima etapa |
-| 7. Exportar modelo aprovado | `python -m ferramentas.exportar --modelo <id>` | `release/` | Próxima etapa |
+```bash
+python -m pip install -r requirements-treino.txt
+```
 
-## 3. Reprodutibilidade
+## 2. Gerar os dados sintéticos
 
-- Toda aleatoriedade usa sementes explícitas, registradas em `MODELO.json`.
-- O TensorFlow pode ter pequenas variações entre CPUs e versões. Por isso relatamos média ± desvio em 5 sementes, e não um único valor.
-- Cada execução de treino salva `ambiente.txt` (versões de Python, TensorFlow e numpy) junto aos resultados.
-- O hash do modelo exportado (`GUARDIA_MODELO_HASH`) permite verificar que o firmware está usando exatamente o modelo avaliado.
+```bash
+python -m ferramentas.gerar_sinteticos --semente 2026
+```
+
+O simulador gera `dados/sinteticos/sessoes_v2.csv`. O treino usa a divisão por participante já versionada em [`splits/split_v2.json`](../splits/split_v2.json). Para regenerar a divisão a partir do CSV, execute `python -m ferramentas.dividir`.
+
+## 3. Treinar e comparar os modelos
+
+```bash
+python -m ferramentas.treinar --saida resultados/reproducao-local --salvar-modelos modelos/reproducao-local
+```
+
+O comando treina baseline, árvore de decisão, regressão logística e MLP. Abra `resultados/reproducao-local/validacao.json` para consultar métricas como log loss e ROC-AUC. A MLP candidata é salva em `modelos/reproducao-local/mlp_candidata.npz`. O conjunto de teste permanece lacrado.
+
+Compare com as [métricas de referência](../resultados/sinteticos/treino_v2/validacao.json). As versões de Python e das bibliotecas estão registradas no JSON, e CPU e dependências podem afetar o resultado do novo treino.
+
+## 4. Exportar o modelo da InovaTech para C++
+
+Depois de gerar os dados no passo 2, execute:
+
+```bash
+python -m ferramentas.exportar_bancada --saida embarcado/bancada_reproduzida
+```
+
+A exportação usa os pesos de referência versionados e confere o hash do relatório de validação registrado em [`ORIGEM.json`](../resultados/sinteticos/treino_v2/ORIGEM.json). A saída contém `guardia_modelo.h`, `guardia_runtime.h` e os arquivos da bancada. O modelo da feira é **`mlp8-sint-20261101-e6a4cf00`**, com arquitetura **13 → 8 → 1**. A [release do Coflume](https://github.com/sarathais-tech/coflume/releases/tag/v0.9-r4-inovatech) contém o firmware que usa esses pesos.
+
+## 5. Verificar a integração
+
+```bash
+python -m pytest -q tests/test_bancada_wokwi.py
+```
+
+Os testes de equivalência com C++ usam `g++` ou `clang++`. Para executar a bancada no ESP32-S3 simulado, siga o [guia do Wokwi](bancada_wokwi.md). Para acompanhar o modelo escolhendo a dificuldade durante um Quiz, siga a [demonstração do Coflume](https://github.com/sarathais-tech/coflume#experimente-a-guardiã-ia).
